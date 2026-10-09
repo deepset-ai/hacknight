@@ -1,0 +1,10 @@
+# How the platform's inputs and outputs map onto the agent. Picked up automatically next to agent.py.
+inputs:
+  messages:
+    - agent.messages
+outputs:
+  messages: agent.messages
+pipeline_output_type: chat
+# What the deployed agent installs. Nothing else is needed.
+dependencies:
+  - haystack-ai==3.0.0
