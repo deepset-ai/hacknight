@@ -12,6 +12,17 @@ curl -fsSL https://raw.githubusercontent.com/deepset-ai/haystack-enterprise-sdk/
 
 Open a new terminal afterwards, then check: `haystack-enterprise --version`.
 
+Then set up the project. The installer also gave you [uv](https://docs.astral.sh/uv/); this
+creates `.venv/` with Haystack in it, which the CLI uses to load your agent:
+
+```bash
+git clone git@github.com:deepset-ai/hacknight.git && cd hacknight
+uv sync
+```
+
+> Seeing `ModuleNotFoundError: No module named 'haystack'`? You skipped `uv sync`, or you're not
+> running the CLI from inside the `hacknight` folder.
+
 ## 2 · The task
 
 Your agent gets a multiple-choice question, always in this shape:
