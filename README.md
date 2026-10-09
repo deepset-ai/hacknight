@@ -7,7 +7,7 @@ leaderboard is on the screen.
 ## 1 · Install the CLI
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/deepset-ai/haystack-enterprise-sdk/main/install.sh | HE_EXTRAS="[deploy]" bash
+curl -fsSL https://raw.githubusercontent.com/deepset-ai/haystack-enterprise-sdk/main/install.sh | bash
 ```
 
 Open a new terminal afterwards, then check: `haystack-enterprise --version`.
@@ -31,7 +31,7 @@ explanation. Anything else counts as wrong.
 
 | | Rule |
 | --- | --- |
-| ⏱ | Each agent gets **10 seconds** per question. Late counts as wrong. |
+| ⏱ | Each agent gets **15 seconds** per question. Late counts as wrong. |
 | ✅ | Most correct answers wins... |
 | 🪙 | ...ties go to the **fewest tokens** spent... |
 | 🏎️ | ...then to the **fastest** total time. |
