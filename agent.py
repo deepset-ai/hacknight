@@ -16,20 +16,21 @@ from haystack.utils import Secret
 # One @tool per file: the CLI copies each tool's file into the deployed agent.
 from calculator import calculate
 from clock import today
+from letters import count_letter
 
 # Try a smaller one. Any OpenAI chat model with tool calling works.
 MODEL = "gpt-4o-mini"
 
 SYSTEM_PROMPT = (
     "You answer multiple-choice quiz questions. Each question has options A, B, C and D. "
-    "Use a tool only if you need to calculate something or need today's date. "
+    "Use a tool only if you need to calculate something or need today's date, or to count letters in a word. "
     "Reply with ONLY the letter of the correct option: A, B, C or D. No other text."
 )
 
 agent = Agent(
     # strict=False: the key only has to exist on the platform, not on your machine.
     chat_generator=OpenAIChatGenerator(model=MODEL, api_key=Secret.from_env_var("OPENAI_API_KEY", strict=False)),
-    tools=[calculate, today],
+    tools=[calculate, today, count_letter],
     system_prompt=SYSTEM_PROMPT,
     max_agent_steps=5,
 )
