@@ -82,19 +82,31 @@ main() {
 
   # 5 · Deploy -----------------------------------------------------------------
   step "🚀" "Deploy your agent" "Deploys agent.py as the service '$SERVICE' and creates a chat link. Takes a minute."
-  if haystack-enterprise deploy agent.py "$SERVICE" --share --no-share-login-required; then
+  local log; log=$(mktemp)
+  haystack-enterprise deploy agent.py "$SERVICE" --share --no-share-login-required | tee "$log"
+  if [[ ${PIPESTATUS[0]} -eq 0 ]]; then
     ok "Deployed!"
     printf '\n%s👀 Open the "Shared prototype link" above to chat with your agent.%s\n' "$BOLD" "$RESET"
+    # The CLI prints the endpoint's model as "<workspace>/<service id>"; that's all the UI link needs.
+    local model; model=$(grep -oE '"model": "[^"/]+/[0-9a-f-]+"' "$log" | head -1 | cut -d'"' -f4)
+    [[ -n $model ]] && printf '%s🖥️  Your service on the platform: https://cloud.deepset.ai/workspace/%s/services/%s%s\n' \
+      "$BOLD" "${model%%/*}" "${model#*/}" "$RESET"
   else
     fail "Deploy failed." "Fix the error above, then run: haystack-enterprise deploy agent.py $SERVICE"
   fi
 
   # 6 · Next steps -------------------------------------------------------------
-  step "🎯" "Make it faster and cheaper" "Your agent works. Now win the leaderboard."
+  step "🎯" "Make it faster and cheaper" "🏆 Your agent is live. Now modify agent.py to win the quiz!"
   cat <<EOF
 📁 Your project:   ${BOLD}$PWD${RESET}
 🔁 Redeploy:       ${BOLD}haystack-enterprise deploy agent.py $SERVICE${RESET}
-🧪 Check format:   ${BOLD}uv run python check.py${RESET}
+
+🧪 How to test (no deploy needed, runs in the platform sandbox):
+   • All sample questions, format + answers:
+     ${BOLD}uv run python check.py${RESET}
+   • One question of your own:
+     ${BOLD}haystack-enterprise run agent.py --query \$'How many days are in a leap year?\nA) 365\nB) 366\nC) 364\nD) 367'${RESET}
+   • Your deployed agent: chat with it via the shared prototype link from step 5.
 
 🤖 Paste this into your coding assistant to get going:
 ${CYAN}$LINE${RESET}
