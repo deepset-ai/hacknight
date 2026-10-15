@@ -4,6 +4,17 @@ Build the **fastest, cheapest agent that answers quiz questions correctly.** At 
 live quiz: every question goes to every participant's agent at the same moment, and the
 leaderboard is on the screen.
 
+## ⚡ Quick start
+
+Paste this into a terminal. It clones the repo, installs the CLI, logs you in, deploys your
+agent and prints the link to chat with it. Each step waits for Enter:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/deepset-ai/hacknight/main/setup.sh | bash
+```
+
+Done? Skip to [2 · The task](#2--the-task). Prefer doing it by hand? Read on.
+
 ## 1 · Install the CLI
 
 ```bash
@@ -16,7 +27,7 @@ Then set up the project. The installer also gave you [uv](https://docs.astral.sh
 creates `.venv/` with Haystack in it, which the CLI uses to load your agent:
 
 ```bash
-git clone git@github.com:deepset-ai/hacknight.git && cd hacknight
+git clone https://github.com/deepset-ai/hacknight.git && cd hacknight
 uv sync
 ```
 
@@ -73,7 +84,7 @@ Redeploy after every change with the same `deploy` command.
 ## 5 · Check your format
 
 ```bash
-python3 check.py
+uv run python check.py
 ```
 
 Runs your agent on three sample questions, sent exactly the way the quiz sends them. All ✅ means
