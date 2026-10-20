@@ -7,4 +7,4 @@ outputs:
 pipeline_output_type: chat
 # What the deployed agent installs. Nothing else is needed.
 dependencies:
-  - haystack-ai==3.0.0
+  - haystack-ai==3.4.0
