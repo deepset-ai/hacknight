@@ -89,7 +89,7 @@ main() {
     printf '\n%s👀 Open the "Shared prototype link" above to chat with your agent.%s\n' "$BOLD" "$RESET"
     # The CLI prints the endpoint's model as "<workspace>/<service id>"; that's all the UI link needs.
     local model; model=$(grep -oE '"model": "[^"/]+/[0-9a-f-]+"' "$log" | head -1 | cut -d'"' -f4)
-    [[ -n $model ]] && printf '%s🖥️  Your service on the platform: https://cloud.deepset.ai/workspace/%s/services/%s%s\n' \
+    [[ -n $model ]] && printf '%s🖥️  Your service on the platform: https://cloud.deepset.ai/%s/gateway/services/%s%s\n' \
       "$BOLD" "${model%%/*}" "${model#*/}" "$RESET"
   else
     fail "Deploy failed." "Fix the error above, then run: haystack-enterprise deploy agent.py $SERVICE"
