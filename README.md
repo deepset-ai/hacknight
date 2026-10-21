@@ -13,7 +13,7 @@ agent and prints the link to chat with it. Each step waits for Enter:
 curl -fsSL https://raw.githubusercontent.com/deepset-ai/hacknight/main/setup.sh | bash
 ```
 
-Done? Skip to [2 · The task](#2--the-task). Prefer doing it by hand? Read on.
+Done? Skip to [What you have now](#-what-you-have-now). Prefer doing it by hand? Read on.
 
 ## 1 · Install the CLI
 
@@ -33,6 +33,19 @@ uv sync
 
 > Seeing `ModuleNotFoundError: No module named 'haystack'`? You skipped `uv sync`, or you're not
 > running the CLI from inside the `hacknight` folder.
+
+## ✅ What you have now
+
+After `setup.sh` (or step 4 by hand), your agent is live: `agent.py` runs as a service called
+**`quiz`** in your workspace on the [Haystack Enterprise Platform](https://cloud.deepset.ai). A
+service is your agent in the cloud behind an API endpoint, and that endpoint is what the quiz
+calls with each question.
+
+- **Chat with it:** open the *Shared prototype link* the script printed.
+- **See it on the platform:** open the service link the script printed, or go to
+  [cloud.deepset.ai](https://cloud.deepset.ai) → your workspace → **Gateway → Services → `quiz`**.
+
+Each `haystack-enterprise deploy agent.py quiz` updates this same service.
 
 ## 2 · The task
 
