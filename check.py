@@ -48,9 +48,30 @@ def last_reply(result) -> str:
     return replies[-1] if replies else ""
 
 
+def tokens_used(result) -> int:
+    """Total tokens over every model call in the run, read from each assistant message's usage."""
+    seen = {}
+
+    def walk(node):
+        if isinstance(node, dict):
+            if str(node.get("role", node.get("_role", ""))).endswith("assistant"):
+                usage = (node.get("meta") or node.get("_meta") or {}).get("usage") or {}
+                # The agent can return the last message twice (messages + last_message): count it once.
+                seen[json.dumps(node, sort_keys=True, default=str)] = usage.get("total_tokens") or 0
+            for value in node.values():
+                walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value)
+
+    walk(result)
+    return sum(seen.values())
+
+
 def main() -> int:
     agent = Path(__file__).with_name("agent.py")
     failed = 0
+    total_tokens = 0
     for question, options, answer in SAMPLES:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "result.json"
@@ -65,14 +86,18 @@ def main() -> int:
                 print(f"❌ {question}\n   run failed:\n{run.stdout}{run.stderr}")
                 failed += 1
                 continue
-            reply = last_reply(json.loads(out.read_text())).strip()
+            result = json.loads(out.read_text())
+            reply = last_reply(result).strip()
+            tokens = tokens_used(result)
+            total_tokens += tokens
         if not re.fullmatch(r"[ABCD]", reply):
             print(f"❌ {question}\n   reply must be exactly one letter A-D, got: {reply!r}")
             failed += 1
         elif reply != answer:
             print(f"⚠️  {question}\n   format ok, but wrong: {reply} (expected {answer})")
         else:
-            print(f"✅ {question}  →  {reply}  ({seconds:.1f}s incl. sandbox start)")
+            print(f"✅ {question}  →  {reply}  ({tokens} tokens, {seconds:.1f}s incl. sandbox start)")
+    print(f"\nTokens spent: {total_tokens} (fewer wins ties on the leaderboard).")
     print("\nFormat ready for the quiz." if not failed else f"\n{failed} reply(s) in the wrong format.")
     return 1 if failed else 0
 
@@ -83,4 +108,10 @@ if __name__ == "__main__":
         {"role": "user", "content": [{"text": "Q"}]},
         {"role": "assistant", "content": [{"text": "B"}]},
     ]}}) == "B"
+    call = {"role": "assistant", "content": [{"text": "B"}], "meta": {"usage": {"total_tokens": 40}}}
+    assert tokens_used({"agent": {"messages": [
+        {"role": "user", "content": [{"text": "Q"}]},
+        {"role": "assistant", "content": [], "meta": {"usage": {"total_tokens": 60}}},
+        call,
+    ], "last_message": call}}) == 100
     sys.exit(main())
