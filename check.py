@@ -49,23 +49,8 @@ def last_reply(result) -> str:
 
 
 def tokens_used(result) -> int:
-    """Total tokens over every model call in the run, read from each assistant message's usage."""
-    seen = {}
-
-    def walk(node):
-        if isinstance(node, dict):
-            if str(node.get("role", node.get("_role", ""))).endswith("assistant"):
-                usage = (node.get("meta") or node.get("_meta") or {}).get("usage") or {}
-                # The agent can return the last message twice (messages + last_message): count it once.
-                seen[json.dumps(node, sort_keys=True, default=str)] = usage.get("total_tokens") or 0
-            for value in node.values():
-                walk(value)
-        elif isinstance(node, list):
-            for value in node:
-                walk(value)
-
-    walk(result)
-    return sum(seen.values())
+    """Total tokens over every model call in the run, as the Agent sums them in `token_usage`."""
+    return (result.get("agent", {}).get("token_usage") or {}).get("total_tokens") or 0
 
 
 def main() -> int:
@@ -108,10 +93,6 @@ if __name__ == "__main__":
         {"role": "user", "content": [{"text": "Q"}]},
         {"role": "assistant", "content": [{"text": "B"}]},
     ]}}) == "B"
-    call = {"role": "assistant", "content": [{"text": "B"}], "meta": {"usage": {"total_tokens": 40}}}
-    assert tokens_used({"agent": {"messages": [
-        {"role": "user", "content": [{"text": "Q"}]},
-        {"role": "assistant", "content": [], "meta": {"usage": {"total_tokens": 60}}},
-        call,
-    ], "last_message": call}}) == 100
+    assert tokens_used({"agent": {"token_usage": {"total_tokens": 319}}}) == 319
+    assert tokens_used({"agent": {"token_usage": {}}}) == 0
     sys.exit(main())

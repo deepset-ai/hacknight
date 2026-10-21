@@ -33,7 +33,12 @@ agent = Agent(
         model=MODEL,
         api_key=Secret.from_env_var("OPENAI_API_KEY", strict=False),
         # Reasoning model with thinking switched off: smart, but fast and cheap.
-        generation_kwargs={"reasoning_effort": "none", "max_completion_tokens": 50},
+        # include_usage: the platform streams, and a stream only reports token usage when asked.
+        generation_kwargs={
+            "reasoning_effort": "none",
+            "max_completion_tokens": 50,
+            "stream_options": {"include_usage": True},
+        },
     ),
     tools=[calculate, count_letter],
     system_prompt=SYSTEM_PROMPT,
