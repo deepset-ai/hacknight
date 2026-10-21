@@ -48,9 +48,15 @@ def last_reply(result) -> str:
     return replies[-1] if replies else ""
 
 
+def tokens_used(result) -> int:
+    """Total tokens over every model call in the run, as the Agent sums them in `token_usage`."""
+    return (result.get("agent", {}).get("token_usage") or {}).get("total_tokens") or 0
+
+
 def main() -> int:
     agent = Path(__file__).with_name("agent.py")
     failed = 0
+    total_tokens = 0
     for question, options, answer in SAMPLES:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "result.json"
@@ -65,14 +71,18 @@ def main() -> int:
                 print(f"❌ {question}\n   run failed:\n{run.stdout}{run.stderr}")
                 failed += 1
                 continue
-            reply = last_reply(json.loads(out.read_text())).strip()
+            result = json.loads(out.read_text())
+            reply = last_reply(result).strip()
+            tokens = tokens_used(result)
+            total_tokens += tokens
         if not re.fullmatch(r"[ABCD]", reply):
             print(f"❌ {question}\n   reply must be exactly one letter A-D, got: {reply!r}")
             failed += 1
         elif reply != answer:
             print(f"⚠️  {question}\n   format ok, but wrong: {reply} (expected {answer})")
         else:
-            print(f"✅ {question}  →  {reply}  ({seconds:.1f}s incl. sandbox start)")
+            print(f"✅ {question}  →  {reply}  ({tokens} tokens, {seconds:.1f}s incl. sandbox start)")
+    print(f"\nTokens spent: {total_tokens} (fewer wins ties on the leaderboard).")
     print("\nFormat ready for the quiz." if not failed else f"\n{failed} reply(s) in the wrong format.")
     return 1 if failed else 0
 
@@ -83,4 +93,6 @@ if __name__ == "__main__":
         {"role": "user", "content": [{"text": "Q"}]},
         {"role": "assistant", "content": [{"text": "B"}]},
     ]}}) == "B"
+    assert tokens_used({"agent": {"token_usage": {"total_tokens": 319}}}) == 319
+    assert tokens_used({"agent": {"token_usage": {}}}) == 0
     sys.exit(main())
